@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\ActionStatus;
-use App\Enums\Feedback;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -72,4 +72,10 @@ class Category extends Model
         return $this->requests()
             ->whereHas('action', fn (Builder $query) => $query->where('status', ActionStatus::CLOSED));
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
 }
