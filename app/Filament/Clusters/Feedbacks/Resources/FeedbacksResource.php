@@ -20,7 +20,7 @@ class FeedbacksResource extends Resource
 {
     protected static ?string $model = FeedbackModel::class;
 
-    protected static ?string $navigationIcon = 'gmdi-feedback-r';
+    protected static ?string $navigationIcon = 'gmdi-feedback-o';
 
     protected static ?string $cluster = Feedbacks::class;
 

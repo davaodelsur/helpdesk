@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\ActionStatus;
+use App\Enums\Feedback as FeedbackEnum;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,8 +25,8 @@ class Category extends Model
     ];
 
     protected $casts = [
-        'standard_type' => Feedback::class,
-        'service_type' => Feedback::class,
+        'standard_type' => FeedbackEnum::class,
+        'service_type' => FeedbackEnum::class,
     ];
 
     public static function booted()

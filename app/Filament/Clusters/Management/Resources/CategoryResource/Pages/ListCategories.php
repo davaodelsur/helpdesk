@@ -17,11 +17,11 @@ class ListCategories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ViewQrCodeAction::make(),
             Actions\CreateAction::make()
                 ->createAnother(false)
                 ->slideOver()
                 ->modalWidth(MaxWidth::Large),
-            ViewQrCodeAction::make(),
         ];
     }
 

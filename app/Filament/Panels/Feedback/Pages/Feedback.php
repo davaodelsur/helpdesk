@@ -161,7 +161,6 @@ class Feedback extends SimplePage implements HasForms
                                 ->email()
                                 ->label('Email Address')
                                 ->placeholder('Email Address')
-                                ->required()
                                 ->default(fn () => request()->user()->email ?? null),
                             DatePicker::make('date')
                                 ->label('Date')
