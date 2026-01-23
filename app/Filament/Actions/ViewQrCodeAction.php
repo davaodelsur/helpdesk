@@ -41,8 +41,11 @@ class ViewQrCodeAction extends Action
 
 
         $this->modalContent(function () {
+            $qrContent = url('/') . '/feedback/' . request()->user()->organization_id . '/feedback';
+
             return view('filament.panels.admin.clusters.organization.view-qrCode', [
-                'qr' => QrCode::size(200)->generate(url('/') . '/feedback/' . request()->user()->organization_id . '/feedback'),
+                'qr' => QrCode::size(200)->generate($qrContent),
+                'qrLink' => $qrContent,
             ]);
         });
 

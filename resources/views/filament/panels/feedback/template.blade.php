@@ -7,7 +7,7 @@
     <div class="w-[8.5in] min-h-[13in] mx-auto">
         <div class="flex justify-between align-baseline">
             <div class="opacity-50">ENGLISH VERSION</div>
-            <div><span>Control No: </span><span class="inline-block min-w-[120px] border-b-[1px] border-black">&nbsp;</span></div>
+            <div><span>Control No:  </span><span class="font-bold inline-block min-w-[100px] border-b-[1px] border-black">{{$record->control_no ?? ''}}</span></div>
         </div>
         <br>
         <div class="grid grid-cols-5 leading-none text-center">
@@ -134,7 +134,7 @@
         <div>
             <div class="mb-2"><span class="font-bold">INSTRUCTIONS:</span> For SQD 0-8, please put a <span class="label">check mark (✔)</span> on the column that best corresponds to your answer.</div>
 
-                <table class="table-fixed">
+                <table class="table-fixed border-collapse w-full">
                   <colgroup>
                     <col style="width: 39%;">
                     <col style="width: 10%">
@@ -145,13 +145,13 @@
                     <col style="width: 10%">
                   </colgroup>
                   <tr class="text-center align-top">
-                    <td class="border border-black"></td>
-                    <td class="border border-black"><span class="emoji">😕</span><div>Strongly Disagree</div></td>
-                    <td class="border border-black"><span class="emoji">🙁</span><div>Disagree</div></td>
-                    <td class="border border-black"><span class="emoji">😐</span><div>Neither Agree nor Disagree</div></td>
-                    <td class="border border-black"><span class="emoji">🙂</span><div>Agree</div></td>
-                    <td class="border border-black"><span class="emoji">😄</span><div>Strongly Agree</div></td>
-                    <td class="border border-black"><div>N/A</div></td>
+                    <td class="border border-black border-solid"></td>
+                    <td class="border border-black border-solid"><span class="emoji">😕</span><div>Strongly Disagree</div></td>
+                    <td class="border border-black border-solid"><span class="emoji">🙁</span><div>Disagree</div></td>
+                    <td class="border border-black border-solid"><span class="emoji">😐</span><div>Neither Agree nor Disagree</div></td>
+                    <td class="border border-black border-solid"><span class="emoji">🙂</span><div>Agree</div></td>
+                    <td class="border border-black border-solid"><span class="emoji">😄</span><div>Strongly Agree</div></td>
+                    <td class="border border-black border-solid"><div>N/A</div></td>
                   </tr>
                   @php
 
@@ -169,9 +169,9 @@
                   @endphp
                   @foreach($sqd as $index => $text)
                     <tr class="text-justify leading-none h-8">
-                      <td class="border border-black p-1">{{ $text }}</td>
+                      <td class="border border-black border-solid p-1">{{ $text }}</td>
                       @for($i=1; $i<=6; $i++)
-                        <td class="border border-black text-center">
+                        <td class="border border-black border-solid text-center">
                             <x-filament::icon
                                 icon="heroicon-s-check"
                                 class="h-5 w-5 text-black dark:text-gray-400 place-self-center {{ $record->getAnswer('SQD'. $index) == $i ? '' : 'hidden' }}"

@@ -9,6 +9,7 @@
         "php": "^8.3",
         "codeat3/blade-google-material-design-icons": "^1.20",
         "codeat3/blade-simple-icons": "^6.11",
+        "codeat3/blade-unicons": "^1.9",
         "filament/filament": "^3.3",
         "laravel/framework": "^12.8",
         "laravel/horizon": "^5.40",

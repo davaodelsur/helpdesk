@@ -2,24 +2,25 @@
 
 namespace App\Filament\Clusters\Feedbacks\Resources;
 
+use App\Enums\UserRole;
 use App\Filament\Actions\Tables\GenerateFeedbackReport;
 use App\Filament\Clusters\Feedbacks;
 use App\Filament\Clusters\Feedbacks\Resources\FeedbacksResource\Pages;
 use App\Jobs\GenerateFeedbackForm;
 use App\Models\Feedback as FeedbackModel;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Spatie\Browsershot\Browsershot;
-use Spatie\LaravelPdf\Enums\Unit;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FeedbacksResource extends Resource
 {
     protected static ?string $model = FeedbackModel::class;
 
-    protected static ?string $navigationIcon = 'gmdi-feedback-r';
+    protected static ?string $navigationIcon = 'gmdi-feedback-o';
 
     protected static ?string $cluster = Feedbacks::class;
 
@@ -54,6 +55,14 @@ class FeedbacksResource extends Resource
             ->filters([
 
             ])
+            ->actions([
+                DeleteAction::make()
+                    ->hidden(fn () => !in_array(Filament::getCurrentPanel()->getId(), [UserRole::ROOT->value]))
+                    ->action(function ($record) {
+                        $record->responses()->delete();
+                        $record->delete();
+                    }),
+            ])
             ->recordUrl(fn ($record): string => static::getUrl('view', ['record' => $record]))
             ->bulkActions([
                 GenerateFeedbackReport::make(),
@@ -83,6 +92,20 @@ class FeedbacksResource extends Resource
                 //             );
                 //         })
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        return match (Filament::getCurrentPanel()->getId()) {
+            UserRole::ROOT->value => $query,
+            UserRole::AUDITOR->value => $query,
+            UserRole::ADMIN->value => $query->whereHas('organization', function ($q) {
+                $q->where('id', Filament::auth()->user()->organization_id);
+                }),
+            default => $query->whereRaw('1 = 0'),
+        };
     }
 
     public static function getPages(): array

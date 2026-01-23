@@ -31,6 +31,8 @@ enum ActionStatus: string implements HasColor, HasDescription, HasIcon, HasLabel
     case TAGGED = 'tagged';
     case CLOSED = 'closed';
 
+    case ELEVATED = 'elevated';
+
     case ON_HOLD = 'on_hold';           // Placeholder only
     case IN_PROGRESS = 'in_progress';
 

@@ -10,6 +10,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Feedback Form</title>
+    {{-- @vite(['resources/css/app.css']) --}}
     <style>
         {!! file_get_contents(public_path('build/' . $cssFile)) !!}
         .checkbox, .radio { margin-right: 6px; vertical-align: middle; }
@@ -27,11 +28,11 @@
                 font-family: 'Noto Color Emoji';
                 src: url('/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf') format('truetype');
             }
-            .emoji {
-                font-family: 'Noto Color Emoji', sans-serif;
-                font-size: 14px;
-                vertical-align: middle;
-            }
+        .emoji {
+            font-family: 'Noto Color Emoji', sans-serif;
+            font-size: 14px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body class="m-0 p-0 text-[10pt] leading-[11pt]">

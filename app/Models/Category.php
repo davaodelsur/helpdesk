@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ActionStatus;
-use App\Enums\Feedback;
+use App\Enums\Feedback as FeedbackEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,8 +25,8 @@ class Category extends Model
     ];
 
     protected $casts = [
-        'standard_type' => Feedback::class,
-        'service_type' => Feedback::class,
+        'standard_type' => FeedbackEnum::class,
+        'service_type' => FeedbackEnum::class,
     ];
 
     public static function booted()
@@ -72,4 +72,10 @@ class Category extends Model
         return $this->requests()
             ->whereHas('action', fn (Builder $query) => $query->where('status', ActionStatus::CLOSED));
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
 }
