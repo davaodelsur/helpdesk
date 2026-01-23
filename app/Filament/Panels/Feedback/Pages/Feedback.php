@@ -3,6 +3,7 @@
 namespace App\Filament\Panels\Feedback\Pages;
 
 use App\Enums\Feedback as EnumsFeedback;
+use App\Enums\Region;
 use App\Enums\SqdOption;
 use App\Enums\SqdQuestion;
 use App\Models\Category;
@@ -95,18 +96,13 @@ class Feedback extends SimplePage implements HasForms
                 'SQD7' => $this->data['SQD7'],
                 'SQD8' => $this->data['SQD8'],
             ];
-            if($this->data['province'] === 'Davao del Sur'){
-                $residence = $this->data['Purok/Sitio'].', '.$this->data['barangay'].', '.$this->data['municipality'].', '.$this->data['province'];
-            }else{
-                $residence = $this->data['residence'];
-            }
 
             $feedback_id = ModelsFeedback::create([
                 'email' => $this->data['email'],
                 'client_type' => $this->data['client_type'] ?? null,
                 'age' => $this->data['age'] ?? null,
                 'gender' => $this->data['gender'] ?? null,
-                'residence' => $residence,
+                'residence' => $this->data['region']->value.', '.$this->data['province'] ?? null,
                 'category_id' => $this->data['category_id'],
                 'expectation' => $this->data['expectation'] ?? null,
                 'strength' => $this->data['strength'] ?? null,
@@ -217,50 +213,16 @@ class Feedback extends SimplePage implements HasForms
                                 ->numeric()
                                 ->placeholder('Enter your age')
                                 ->rules(['min:1', 'max:120']),
+                            Select::make('region')
+                                ->label('Region')
+                                ->default(Region::REGION_11)
+                                ->options(Region::class),
                             Select::make('province')
                                 ->label('Province')
-                                ->required()
-                                ->live()
-                                ->default('Davao del Sur')
                                 ->options([
                                     'Davao del Sur' => 'Davao del Sur',
-                                    'Outside of Davao del Sur' => 'Outside of Davao del Sur',
-                                ]),
-                            Select::make('municipality')
-                                ->label('City/Municipality')
-                                ->required()
-                                ->disabled(fn($get) => $get('province')==='Outside of Davao del Sur')
-                                ->placeholder('Select your city/municipality')
-                                ->options(function (){
-                                    return Municipality::orderBy('name')->pluck('name','name')->toArray();
-                                }),
-                            Select::make('barangay')
-                                ->label('Barangay')
-                                ->required()
-                                ->disabled(fn($get) => $get('province')==='Outside of Davao del Sur')
-                                ->placeholder('Select your barangay')
-                                ->options(function (callable $get){
-                                    $municipality = $get('municipality');
-                                    if(!$municipality){
-                                        return [];
-                                    }
-                                    $municipalityModel = Municipality::where('name', $municipality)->first();
-                                    if(!$municipalityModel){
-                                        return [];
-                                    }
-                                    return $municipalityModel->barangays()->orderBy('name')->pluck('name','name')->toArray();
-                                }),
-                            TextInput::make('Purok/Sitio')
-                                ->label('Purok/Sitio/Street')
-                                ->placeholder('Enter your Purok/Sitio/Street')
-                                ->required()
-                                ->disabled(fn($get) => $get('province')==='Outside of Davao del Sur'),
-                            TextInput::make('residence')
-                                ->label('Residence')
-                                ->columnSpanFull()
-                                ->placeholder('Enter your residence (e.g., Outside of Davao del Sur or specific address)')
-                                ->required()
-                                ->visible(fn($get) => $get('province')==='Outside of Davao del Sur'),
+                                    'outside' => 'Other Provinces',
+                                ])
                         ]),
                     Step::make('Feedback')
                         ->schema([
@@ -327,7 +289,7 @@ class Feedback extends SimplePage implements HasForms
                                                 ->options(SqdOption::class)
                                                 ->inline()
                                                 ->inlineLabel(false)
-                                                ->extraAttributes(['class'=> 'flex-col lg:flex-row lg:!gap-20'])
+                                                ->extraAttributes(['class'=> 'flex-col lg:flex-row lg:!justify-evenly'])
                                                 ->required();
                                         }
                                         return $fields;
@@ -362,7 +324,6 @@ class Feedback extends SimplePage implements HasForms
                             Submit Feedback
                         </x-filament::button>
                         BLADE
-
                     )))
             ]);
     }

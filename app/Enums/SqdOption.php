@@ -11,6 +11,7 @@ enum SqdOption: string implements HasLabel
     case NEUTRAL = '3';
     case AGREE = '4';
     case STRONGLY_AGREE = '5';
+    case NOT_APPLICABLE = '0';
 
     public function getLabel(): ?string
     {
@@ -20,6 +21,7 @@ enum SqdOption: string implements HasLabel
             self::NEUTRAL => '3 - Neutral',
             self::AGREE => '4 - Agree',
             self::STRONGLY_AGREE => '5 - Strongly Agree',
+            self::NOT_APPLICABLE => 'N/A - Not Applicable',
         };
     }
 

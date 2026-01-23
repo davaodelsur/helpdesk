@@ -33,7 +33,7 @@ class FeedbackForm extends ViewRecord
         return [
             Actions\Action::make('back')
                 ->label('Back')
-                ->url($this->getResource()::getUrl('index'))
+                ->url(url()->previous())
                 ->color('gray')
                 ->icon('heroicon-o-arrow-left'),
             Actions\Action::make('export')

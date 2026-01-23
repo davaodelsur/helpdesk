@@ -25,6 +25,8 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Transactions';
 
+    protected static ?string $modelLabel = 'Transaction Category';
+
     public static function table(Table $table): Table
     {
         return $table
@@ -50,15 +52,13 @@ class CategoryResource extends Resource
                     ->formatStateUsing(fn($state, $record) => $state + $record->requests()->count())
                     ->sortable()
                     ->default(0),
-            ]);
+            ])
+            ->recordUrl( fn (Category $record) => static::getUrl('ListFeedbacks', ['record' => $record]) );
     }
 
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ])
             ->withSum('transactions', 'total_transactions');
 
         return match (Filament::getCurrentPanel()->getId()) {
@@ -72,6 +72,7 @@ class CategoryResource extends Resource
     {
         return [
             'index' => Pages\ListCategories::route('/'),
+            'ListFeedbacks' => Pages\ListFeedbacks::route('/{record}/feedbacks'),
         ];
     }
 }
