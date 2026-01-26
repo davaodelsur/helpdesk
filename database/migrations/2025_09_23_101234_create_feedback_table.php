@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignUlid('organization_id')->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
             $table->foreignUlid('user_id')->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
