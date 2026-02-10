@@ -82,8 +82,7 @@ class Request extends Model
 
     public function actions(): HasMany
     {
-        return $this->hasMany(Action::class)
-            ->latest();
+        return $this->hasMany(Action::class);
     }
 
     public function submission(): HasOne

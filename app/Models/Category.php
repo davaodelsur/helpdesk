@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ActionStatus;
 use App\Enums\Feedback as FeedbackEnum;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -76,6 +77,11 @@ class Category extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function getTotalTransactionsAttribute(): int
+    {
+        return $this->transactions()->sum('total_transactions') + $this->feedbacks()->count() + $this->requests()->count();
     }
 
 }

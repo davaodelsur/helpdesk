@@ -110,6 +110,7 @@ class Feedback extends SimplePage implements HasForms
                 'organization_id' => $this->organization->id,
                 'request_id' => $this->request->id ?? null,
                 'user_id' => $this->request->user_id ?? null,
+                'created_at' => $this->data['date'] ?? now(),
             ]);
 
             foreach($cc as $question => $answer){
@@ -160,8 +161,7 @@ class Feedback extends SimplePage implements HasForms
                                 ->default(fn () => request()->user()->email ?? null),
                             DatePicker::make('date')
                                 ->label('Date')
-                                ->required()
-                                ->disabled(),
+                                ->required(),
                             Checkbox::make('consent')
                                 ->accepted()
                                 ->required()

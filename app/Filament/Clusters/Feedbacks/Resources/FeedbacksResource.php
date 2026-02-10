@@ -6,12 +6,14 @@ use App\Enums\UserRole;
 use App\Filament\Actions\Tables\GenerateFeedbackReport;
 use App\Filament\Clusters\Feedbacks;
 use App\Filament\Clusters\Feedbacks\Resources\FeedbacksResource\Pages;
-use App\Jobs\GenerateFeedbackForm;
 use App\Models\Feedback as FeedbackModel;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ForceDeleteAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -34,7 +36,7 @@ class FeedbacksResource extends Resource
                     ->sortable(),
                 TextColumn::make('feedbacks.category_id')
                     ->label('Service Type')
-                    ->searchable()
+                    ->limit(50)
                     ->sortable()
                     ->getStateUsing(fn ($record) => $record->category?->name),
                 TextColumn::make('organization.code')
@@ -53,14 +55,24 @@ class FeedbacksResource extends Resource
                     ->sortable(),
                 ])
             ->filters([
-
+                SelectFilter::make('organization_id')
+                    ->label('Organization')
+                    ->searchable()
+                    ->options(fn () => \App\Models\Organization::pluck('code', 'id'))
+                    ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor'])),
             ])
             ->actions([
                 DeleteAction::make()
-                    ->hidden(fn () => !in_array(Filament::getCurrentPanel()->getId(), [UserRole::ROOT->value]))
+                    ->hidden(fn ($record) => $record->trashed() === true || !in_array(Filament::getCurrentPanel()->getId(), [UserRole::ROOT->value]))
                     ->action(function ($record) {
                         $record->responses()->delete();
                         $record->delete();
+                    }),
+                ForceDeleteAction::make()
+                    ->hidden(fn () => !in_array(Filament::getCurrentPanel()->getId(), [UserRole::ROOT->value]))
+                    ->action(function ($record) {
+                        $record->responses()->forceDelete();
+                        $record->forceDelete();
                     }),
             ])
             ->recordUrl(fn ($record): string => static::getUrl('view', ['record' => $record]))
