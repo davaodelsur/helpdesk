@@ -147,8 +147,8 @@ return [
 
     'attachments' => [
         'auto_purge' => [
-            'requests' => env('ATTACHMENTS_REQUESTS_AUTO_PURGE', 7), // days
-            'actions' => env('ATTACHMENTS_ACTIONS_AUTO_PURGE', 7),   // days
+            'requests' => env('ATTACHMENTS_REQUESTS_AUTO_PURGE', 14), // days
+            'actions' => env('ATTACHMENTS_ACTIONS_AUTO_PURGE', 14),   // days
         ],
     ],
 

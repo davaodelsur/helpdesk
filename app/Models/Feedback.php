@@ -28,6 +28,8 @@ class Feedback extends Model
         'strength',
         'improvement',
         'deleted_at',
+        'created_at',
+        'updated_at',
     ];
 
     protected static function booted(): void

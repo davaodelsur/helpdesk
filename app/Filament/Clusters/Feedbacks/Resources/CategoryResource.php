@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -33,7 +34,8 @@ class CategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Category Name')
-                    ->searchable(isIndividual:true),
+                    ->searchable(isIndividual:true)
+                    ->limit(50),
                 TextColumn::make('organization.code')
                     ->label('Organization')
                     ->default('N/A')
@@ -45,15 +47,21 @@ class CategoryResource extends Resource
                     ->default(0),
                 TextColumn::make('not_surveyed_count')
                     ->label('Not Surveyed')
-                    ->formatStateUsing(fn($record) => $record->requests()->count()- $record->feedbacks()->count())
-                    ->default(0),
-                TextColumn::make('transactions_sum_total_transactions')
+                    ->default(0)
+                    ->formatStateUsing(fn($state, $record) => $record->getTotalTransactionsAttribute() - $record->feedbacks()->count()),
+                TextColumn::make('total_transactions')
                     ->label('Total Transactions')
-                    ->formatStateUsing(fn($state, $record) => $state + $record->requests()->count())
                     ->sortable()
                     ->default(0),
             ])
-            ->recordUrl( fn (Category $record) => static::getUrl('ListFeedbacks', ['record' => $record]) );
+            ->recordUrl( fn (Category $record) => static::getUrl('ListFeedbacks', ['record' => $record]) )
+            ->filters([
+                SelectFilter::make('organization_id')
+                   ->label('Organization')
+                   ->searchable()
+                   ->options(fn () => \App\Models\Organization::pluck('code', 'id'))
+                   ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor'])),
+            ]);
     }
 
     public static function getEloquentQuery(): Builder
@@ -63,6 +71,7 @@ class CategoryResource extends Resource
 
         return match (Filament::getCurrentPanel()->getId()) {
             'root' => $query,
+            'auditor' => $query,
             'admin' => $query->where('organization_id', Filament::auth()->user()->organization_id),
             default => $query->whereRaw('1 = 0'),
         };

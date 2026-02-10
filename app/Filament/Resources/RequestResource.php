@@ -7,14 +7,17 @@ use App\Enums\ActionStatus;
 use App\Enums\RequestClass;
 use App\Filament\Clusters\Requests;
 use App\Filament\Filters\AssigneeFilter;
+use App\Filament\Filters\MonthFilter;
 use App\Filament\Filters\OrganizationFilter;
 use App\Filament\Filters\TagFilter;
 use App\Models\Action;
 use App\Models\Category;
 use App\Models\Request;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Grouping\Group;
@@ -110,7 +113,10 @@ abstract class RequestResource extends Resource
                         HTML;
 
                         return str($html)->toHtmlString();
-                    }, 'above'),
+                    }, 'above')
+                    ->sortable(query: function(Builder $query, string $direction) {
+                            return $query->reorder()->orderBy('created_at', $direction);
+                        }),
                 TextColumn::make('user.name')
                     ->searchable(['name', 'email'])
                     ->description(fn (Request $request) => $request->from?->code)
@@ -166,18 +172,21 @@ abstract class RequestResource extends Resource
                         fn (Request $record): string => $record->created_at->format('F Y')
                     )
                     ->orderQueryUsing(
-                        fn (Builder $query) => $query->orderBy(
-                            Action::query()
+                        function($query) {
+                            $query->orderBy(
+                                Action::query()
                                 ->select('id')
                                 ->whereColumn('actions.request_id', 'requests.id')
                                 ->where('status', ActionStatus::SUBMITTED)
                                 ->latest()
                                 ->limit(1),
-                            'desc'
-                        )
+                                'desc'
+                                );
+                        }
                     )
                     ->titlePrefixedWithLabel(false),
-            );
+            )
+            ;
     }
 
     public static function getNavigationBadge(): ?string
@@ -253,6 +262,7 @@ abstract class RequestResource extends Resource
                         ->multiple()
                         ->placeholder('Select categories'),
                     TagFilter::make(),
+                    MonthFilter::make(),
                 ],
                 default => [
                     TagFilter::make(),
