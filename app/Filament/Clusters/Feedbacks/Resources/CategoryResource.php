@@ -30,6 +30,7 @@ class CategoryResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $panel = Filament::getCurrentPanel()->getId();
         return $table
             ->columns([
                 TextColumn::make('name')
@@ -54,13 +55,13 @@ class CategoryResource extends Resource
                     ->sortable()
                     ->default(0),
             ])
-            ->recordUrl( fn (Category $record) => static::getUrl('ListFeedbacks', ['record' => $record]) )
+            ->recordUrl( fn (Category $record) => static::getUrl('ListFeedbacks', ['record' => $record]))
             ->filters([
                 SelectFilter::make('organization_id')
                    ->label('Organization')
                    ->searchable()
                    ->options(fn () => \App\Models\Organization::pluck('code', 'id'))
-                   ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor'])),
+                   ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor']))
             ]);
     }
 
@@ -82,6 +83,13 @@ class CategoryResource extends Resource
         return [
             'index' => Pages\ListCategories::route('/'),
             'ListFeedbacks' => Pages\ListFeedbacks::route('/{record}/feedbacks'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            CategoryResource\Widgets\TransactionOverview::class,
         ];
     }
 }
