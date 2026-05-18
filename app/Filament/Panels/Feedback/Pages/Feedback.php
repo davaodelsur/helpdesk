@@ -117,6 +117,7 @@ class Feedback extends SimplePage implements HasForms
             foreach($cc as $question => $answer){
                 $feedback_id->responses()->create([
                     'question_type' => 'Citizen Charter',
+                    'category_id' => $this->data['category_id'],
                     'question' => $question,
                     'answer' => $answer,
                 ]);
@@ -125,6 +126,7 @@ class Feedback extends SimplePage implements HasForms
             foreach($sqd as $question => $answer){
                 $feedback_id->responses()->create([
                     'question_type' => 'Service Quality Dimension',
+                    'category_id' => $this->data['category_id'],
                     'question' => $question,
                     'answer' => $answer,
                 ]);

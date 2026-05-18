@@ -4,7 +4,9 @@ namespace App\Filament\Clusters\Feedbacks\Resources;
 
 use App\Filament\Clusters\Feedbacks;
 use App\Filament\Clusters\Feedbacks\Resources\CategoryResource\Pages;
+use App\Filament\Clusters\Feedbacks\Widgets\TransactionOverview;
 use App\Models\Category;
+use App\Models\Transaction;
 use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -49,8 +51,8 @@ class CategoryResource extends Resource
                 TextColumn::make('not_surveyed_count')
                     ->label('Not Surveyed')
                     ->default(0)
-                    ->formatStateUsing(fn($state, $record) => $record->getTotalTransactionsAttribute() - $record->feedbacks()->count()),
-                TextColumn::make('total_transactions')
+                    ->formatStateUsing(fn($state, $record) => $record->transactions_sum_total_transactions - $record->feedbacks()->count()),
+                TextColumn::make('transactions_sum_total_transactions')
                     ->label('Total Transactions')
                     ->sortable()
                     ->default(0),
@@ -63,6 +65,13 @@ class CategoryResource extends Resource
                    ->options(fn () => \App\Models\Organization::pluck('code', 'id'))
                    ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor']))
             ]);
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            TransactionOverview::class,
+        ];
     }
 
     public static function getEloquentQuery(): Builder
@@ -86,10 +95,4 @@ class CategoryResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            CategoryResource\Widgets\TransactionOverview::class,
-        ];
-    }
 }

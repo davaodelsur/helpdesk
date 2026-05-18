@@ -57,6 +57,7 @@ class TallyTransactionsAction extends Action
                         'category_id' => $transactionData['category_id'],
                         'organization_id' => Filament::auth()->user()->organization_id,
                         'total_transactions' => $transactionData['total_transactions'],
+                        'user_id' => Filament::auth()->id(),
                     ]);
                 }
 

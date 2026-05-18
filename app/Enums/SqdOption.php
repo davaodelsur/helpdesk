@@ -25,4 +25,16 @@ enum SqdOption: string implements HasLabel
         };
     }
 
+    public function getTableColumns(): ?string
+    {
+        return match ($this) {
+            self::STRONGLY_DISAGREE => 'ans_1_count',
+            self::DISAGREE => 'ans_2_count',
+            self::NEUTRAL => 'ans_3_count',
+            self::AGREE => 'ans_4_count',
+            self::STRONGLY_AGREE => 'ans_5_count',
+            self::NOT_APPLICABLE => 'ans_0_count',
+        };
+    }
+
 }

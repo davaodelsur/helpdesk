@@ -15,6 +15,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->foreignUlid('category_id')->constrained('categories')->restrictOnDelete()->cascadeOnUpdate();
             $table->foreignUlid('organization_id')->constrained('organizations')->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->integer('total_transactions');
             $table->timestamps();
         });

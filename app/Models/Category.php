@@ -79,9 +79,9 @@ class Category extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public function getTotalTransactionsAttribute(): int
-    {
-        return $this->transactions()->sum('total_transactions') + $this->requests()->count() + $this->feedbacks()->count();
-    }
+    // public function getTotalTransactionsAttribute(): int
+    // {
+    //     return $this->transactions()->sum('total_transactions') + $this->requests()->count() + $this->feedbacks()->count();
+    // }
 
 }

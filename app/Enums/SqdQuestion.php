@@ -17,6 +17,20 @@ enum SqdQuestion: string implements HasLabel, HasDescription
     case SQD7 = 'SQD7';
     case SQD8 = 'SQD8';
 
+    public function getStandardizedName(): ?string
+    {
+        return match ($this) {
+            self::SQD1 => 'Responsiveness',
+            self::SQD2 => 'Reliability',
+            self::SQD3 => 'Access and Facilities',
+            self::SQD4 => 'Communication',
+            self::SQD5 => 'Costs',
+            self::SQD6 => 'Integrity',
+            self::SQD7 => 'Assurance',
+            self::SQD8 => 'Outcome',
+        };
+    }
+
     public function getLabel(): ?string
     {
         return match ($this) {
@@ -46,4 +60,5 @@ enum SqdQuestion: string implements HasLabel, HasDescription
             self::SQD8 => 'I got what I needed from this office, or (if denied) denial of request was sufficiently explained to me.',
         };
     }
+
 }
