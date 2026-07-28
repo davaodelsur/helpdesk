@@ -6,11 +6,13 @@ use App\Enums\Feedback as EnumsFeedback;
 use App\Filament\Clusters\Feedbacks\Widgets\Concerns\FeedbackScopes;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Livewire\Attributes\Reactive;
 
 class GenderChart extends ChartWidget
 {
     use FeedbackScopes;
+    use InteractsWithPageFilters;
 
     #[Reactive]
     public ?string $selectedOrganizationId = null;

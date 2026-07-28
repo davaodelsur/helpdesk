@@ -3,19 +3,23 @@
 namespace App\Filament\Clusters\Feedbacks\Widgets;
 
 use App\Enums\UserRole;
+use App\Filament\Clusters\Feedbacks\Widgets\Concerns\FeedbackScopes;
 use App\Models\Feedback;
 use App\Models\Response;
 use App\Models\Transaction;
 use Filament\Facades\Filament;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Reactive;
-use Livewire\Livewire;
 
 class OverviewStatsWidget extends StatsOverviewWidget
 {
+    use FeedbackScopes;
+    use InteractsWithPageFilters;
+
     #[Reactive]
     public ?string $selectedOrganizationId = null;
 
@@ -111,7 +115,7 @@ class OverviewStatsWidget extends StatsOverviewWidget
             }
 
                 $totalTransactionsCount = $transactionQuery->sum('total_transactions');
-                $totalFeedbacksCount = $feedbackQuery->count();
+                $totalFeedbacksCount = $this->applyPageFilters($feedbackQuery)->count();
 
             return Number::percentage(($totalFeedbacksCount / $totalTransactionsCount) * 100, 1);
 
@@ -124,8 +128,6 @@ class OverviewStatsWidget extends StatsOverviewWidget
 
     protected function getOverallScore(string $panelID) : string
     {
-        $positiveResponses = Response::where('answer','>=', 4)->where('question','not like', 'CC%')->where('question', '!=', 'SQD0')->count();
-
         $totalRespondents = function() use ($panelID) {
             $query = Feedback::query();
 
@@ -137,7 +139,7 @@ class OverviewStatsWidget extends StatsOverviewWidget
                 $query->where('organization_id', $this->selectedOrganizationId);
             }
 
-            return $query->count();
+            return $this->applyPageFilters($query)->count();
         };
 
         $totalNoReponse = function() use ($panelID) {
@@ -155,7 +157,7 @@ class OverviewStatsWidget extends StatsOverviewWidget
                 });
             }
 
-            return $query->count();
+            return $this->applyPageFiltersToResponseQuery($query)->count();
         };
 
         $positiveResponses = function() use ($panelID) {
@@ -173,7 +175,7 @@ class OverviewStatsWidget extends StatsOverviewWidget
                 });
             }
 
-            return $query->count();
+            return $this->applyPageFiltersToResponseQuery($query)->count();
         };
         try{
             $totalScore = (($positiveResponses()) / (($totalRespondents()*8) - $totalNoReponse()) * 100);
@@ -197,7 +199,7 @@ class OverviewStatsWidget extends StatsOverviewWidget
                 $query->where('organization_id', $selectedOrganizationId);
             });
         }
-        return $partCountQuery;
+        return $this->applyPageFiltersToResponseQuery($partCountQuery);
     }
 
     private function responseTotalCountScope(?string $selectedOrganizationId, string $panelID): Builder
@@ -216,7 +218,7 @@ class OverviewStatsWidget extends StatsOverviewWidget
             });
         }
 
-        return $totalCountQuery;
+        return $this->applyPageFiltersToResponseQuery($totalCountQuery);
     }
 
 }

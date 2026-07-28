@@ -39,6 +39,10 @@ class SelectAction extends Action
         $this->action(function ($arguments, $livewire) {
             $livewire->selectedOrganizationId = $arguments['value'] === 'all' ? null : $arguments['value'];
 
+            if (is_array($livewire->filters ?? null)) {
+                $livewire->filters['category_id'] = null;
+            }
+
             $livewire->resetTable();
         });
     }

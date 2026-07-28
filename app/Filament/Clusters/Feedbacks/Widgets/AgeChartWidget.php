@@ -5,11 +5,13 @@ namespace App\Filament\Clusters\Feedbacks\Widgets;
 use App\Enums\Feedback as EnumsFeedback;
 use App\Filament\Clusters\Feedbacks\Widgets\Concerns\FeedbackScopes;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Livewire\Attributes\Reactive;
 
 class AgeChartWidget extends ChartWidget
 {
     use FeedbackScopes;
+    use InteractsWithPageFilters;
 
     #[Reactive]
     public ?string $selectedOrganizationId = null;

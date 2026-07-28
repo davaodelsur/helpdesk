@@ -20,7 +20,7 @@ trait FeedbackScopes
             $query->where('organization_id', request()->user()->organization_id);
         }
 
-        $query = match($this->filter) {
+        $query = match($this->filter ?? null) {
             'internal' => $query->whereHas('category', function($q) {
                 $q->where('service_type', 'internal');
             }),
@@ -30,6 +30,31 @@ trait FeedbackScopes
             default => $query,
         };
 
-        return $query;
+        return $this->applyPageFilters($query);
+    }
+
+    protected function applyPageFilters(Builder $query): Builder
+    {
+        $filters = property_exists($this, 'filters') ? ($this->filters ?? []) : [];
+
+        return $query
+            ->when($filters['startDate'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '>=', $date))
+            ->when($filters['endDate'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '<=', $date))
+            ->when($filters['category_id'] ?? null, fn (Builder $q, $categoryId) => $q->where('category_id', $categoryId));
+    }
+
+    protected function applyPageFiltersToResponseQuery(Builder $query): Builder
+    {
+        $filters = property_exists($this, 'filters') ? ($this->filters ?? []) : [];
+
+        if (empty($filters['startDate']) && empty($filters['endDate']) && empty($filters['category_id'])) {
+            return $query;
+        }
+
+        return $query->whereHas('feedback', function (Builder $q) use ($filters) {
+            $q->when($filters['startDate'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '>=', $date))
+                ->when($filters['endDate'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '<=', $date))
+                ->when($filters['category_id'] ?? null, fn (Builder $q, $categoryId) => $q->where('category_id', $categoryId));
+        });
     }
 }
