@@ -8,11 +8,13 @@ use App\Filament\Clusters\Feedbacks\Widgets\TransactionOverview;
 use App\Models\Category;
 use App\Models\Transaction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,7 +65,28 @@ class CategoryResource extends Resource
                    ->label('Organization')
                    ->searchable()
                    ->options(fn () => \App\Models\Organization::pluck('code', 'id'))
-                   ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor']))
+                   ->hidden(fn() => !in_array(Filament::getCurrentPanel()->getId(), ['root', 'auditor'])),
+                SelectFilter::make('service_type')
+                    ->label('Service Type')
+                    ->options(fn () => \App\Enums\Feedback::serviceTypesLabel()),
+                Filter::make('date')
+                    ->form([
+                        DatePicker::make('startDate')
+                            ->label('Start Date'),
+                        DatePicker::make('endDate')
+                            ->label('End Date'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['startDate'],
+                                fn (Builder $query, $date): Builder => $query->whereHas('transactions', fn (Builder $q) => $q->whereDate('date', '>=', $date)),
+                            )
+                            ->when(
+                                $data['endDate'],
+                                fn (Builder $query, $date): Builder => $query->whereHas('transactions', fn (Builder $q) => $q->whereDate('date', '<=', $date)),
+                            );
+                    }),
             ]);
     }
 

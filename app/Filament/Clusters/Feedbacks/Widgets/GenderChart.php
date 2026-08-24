@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Feedbacks\Widgets;
 
-use App\Enums\Feedback as EnumsFeedback;
 use App\Filament\Clusters\Feedbacks\Widgets\Concerns\FeedbackScopes;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
@@ -127,12 +126,5 @@ class GenderChart extends ChartWidget
                 };
             })()
         JS);
-    }
-
-    protected function getFilters(): ?array
-    {
-        return [
-            'overall' => 'Overall',
-            ] + EnumsFeedback::serviceTypesLabel();
     }
 }

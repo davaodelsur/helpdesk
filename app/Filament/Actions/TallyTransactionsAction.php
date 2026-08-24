@@ -7,9 +7,11 @@ use App\Models\Category;
 use App\Models\Transaction;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 
 class TallyTransactionsAction extends Action
@@ -40,8 +42,11 @@ class TallyTransactionsAction extends Action
                                 ->label('Total Transactions')
                                 ->mask('9999999999')
                                 ->required(),
+                            DatePicker::make('date')
+                                ->label('Date')
+                                ->required(),
                         ])
-                        ->columns(2)
+                        ->columns(3)
                         ->minItems(1)
                         ->addActionLabel('Add Transaction')
                         ->reorderable(false),
@@ -57,9 +62,15 @@ class TallyTransactionsAction extends Action
                         'category_id' => $transactionData['category_id'],
                         'organization_id' => Filament::auth()->user()->organization_id,
                         'total_transactions' => $transactionData['total_transactions'],
+                        'date' => $transactionData['date'],
                         'user_id' => Filament::auth()->id(),
                     ]);
                 }
+
+                Notification::make()
+                    ->title('Transactions tallied successfully.')
+                    ->success()
+                    ->send();
 
                 $this->commitDatabaseTransaction();
 

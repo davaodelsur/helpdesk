@@ -3,24 +3,26 @@
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 enum SqdOption: string implements HasLabel
 {
-    case STRONGLY_DISAGREE = '1';
-    case DISAGREE = '2';
-    case NEUTRAL = '3';
-    case AGREE = '4';
     case STRONGLY_AGREE = '5';
+    case AGREE = '4';
+    case NEUTRAL = '3';
+    case DISAGREE = '2';
+    case STRONGLY_DISAGREE = '1';
     case NOT_APPLICABLE = '0';
 
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::STRONGLY_DISAGREE => '1 - Strongly Disagree',
-            self::DISAGREE => '2 - Disagree',
-            self::NEUTRAL => '3 - Neutral',
-            self::AGREE => '4 - Agree',
             self::STRONGLY_AGREE => '5 - Strongly Agree',
+            self::AGREE => '4 - Agree',
+            self::NEUTRAL => '3 - Neutral',
+            self::DISAGREE => '2 - Disagree',
+            self::STRONGLY_DISAGREE => '1 - Strongly Disagree',
             self::NOT_APPLICABLE => 'N/A - Not Applicable',
         };
     }
@@ -35,6 +37,23 @@ enum SqdOption: string implements HasLabel
             self::STRONGLY_AGREE => 'ans_5_count',
             self::NOT_APPLICABLE => 'ans_0_count',
         };
+    }
+
+    public function getColoredLabel(): Htmlable
+    {
+        $textColor = match ($this->getLabel()) {
+            '5 - Strongly Agree' => 'text-emerald-500',
+            '4 - Agree' => 'text-emerald-500 ',
+            '3 - Neutral' => 'text-amber-500 ',
+            '2 - Disagree' => 'text-red-500 ',
+            '1 - Strongly Disagree' => 'text-red-700 ',
+            'N/A - Not Applicable' => 'text-gray-500 ',
+            default   => 'text-gray-500 ',
+        };
+
+        return new HtmlString(
+            "<span class=\"font-medium {$textColor}\">{$this->getLabel()}</span>"
+        );
     }
 
 }

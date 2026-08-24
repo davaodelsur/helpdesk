@@ -289,7 +289,7 @@ class Feedback extends SimplePage implements HasForms
                                         foreach(SqdQuestion::cases() as $question){
                                             $fields[] = Radio::make($question->value)
                                                 ->label($question->getLabel().'. '.$question->getDescription())
-                                                ->options(SqdOption::class)
+                                                ->options(collect(SqdOption::cases())->mapWithKeys(fn ($option) => [$option->value => $option->getColoredLabel()])->toArray())
                                                 ->inline()
                                                 ->inlineLabel(false)
                                                 ->extraAttributes(['class'=> 'flex-col lg:flex-row lg:!justify-evenly'])

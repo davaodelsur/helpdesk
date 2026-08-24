@@ -2,13 +2,11 @@
 
 namespace App\Filament\Clusters\Feedbacks\Widgets;
 
-use App\Enums\Feedback as FeedbackEnum;
 use App\Enums\UserRole;
 use App\Filament\Clusters\Feedbacks\Widgets\Concerns\FeedbackScopes;
 use App\Models\Feedback;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget;
@@ -57,20 +55,6 @@ class RegionChartWidget extends TableWidget
                     ->label('Number of Feedbacks')
                     ->sortable()
                     ->summarize(Sum::make()->label('Total')),
-            ])
-            ->filters([
-                SelectFilter::make('category.service_type')
-                    ->label('Service Type')
-                    ->options(FeedbackEnum::serviceTypesLabel())
-                    ->query(function ($query, $data) {
-                        if(is_null($data['value'])){
-                            return $query;
-                        };
-
-                        return $query->whereHas('category', function ($q) use ($data) {
-                            $q->where('service_type', $data);
-                        });
-                    }),
             ]);
     }
 

@@ -6,7 +6,6 @@ use App\Enums\Feedback;
 use App\Enums\SqdQuestion;
 use App\Enums\UserRole;
 use App\Filament\Actions\Header\FilterAction;
-use App\Filament\Actions\Header\SelectAction;
 use App\Filament\Clusters\Feedbacks;
 use App\Filament\Clusters\Feedbacks\Widgets\AgeChartWidget;
 use App\Filament\Clusters\Feedbacks\Widgets\CustomerTypeWidget;
@@ -15,6 +14,7 @@ use App\Filament\Clusters\Feedbacks\Widgets\OverviewStatsWidget;
 use App\Filament\Clusters\Feedbacks\Widgets\RegionChartWidget;
 use App\Filament\Clusters\Feedbacks\Widgets\SQD0Widget;
 use App\Models\Category;
+use App\Models\Organization;
 use App\Models\Response;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -28,7 +28,6 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -69,20 +68,34 @@ class Dashboard extends Page implements HasForms, HasTable
     {
         return $form
             ->schema([
-                DatePicker::make('startDate')
-                    ->label('Start date')
-                    ->native(false)
-                    ->maxDate(fn (callable $get) => $get('endDate') ?: now()),
-                DatePicker::make('endDate')
-                    ->label('End date')
-                    ->native(false)
-                    ->minDate(fn (callable $get) => $get('startDate'))
-                    ->maxDate(now()),
+                Select::make('organization_id')
+                    ->label('Organization')
+                    ->placeholder('All organizations')
+                    ->searchable()
+                    ->hidden(fn() => request()->user()->role !== UserRole::AUDITOR)
+                    ->options(fn (): array => Organization::pluck('code', 'id')->toArray()),
+                Select::make('standard_type')
+                    ->label('Standard Type')
+                    ->placeholder('All standard types')
+                    ->searchable()
+                    ->options(fn (): array => Feedback::standardizationsLabel()),
                 Select::make('category_id')
                     ->label('Category')
                     ->placeholder('All categories')
                     ->searchable()
                     ->options(fn (): array => $this->getCategoryOptions()),
+                Select::make('service_type')
+                    ->label('Service Type')
+                    ->placeholder('All service types')
+                    ->searchable()
+                    ->options(fn (): array => Feedback::serviceTypesLabel()),
+                DatePicker::make('startDate')
+                    ->label('Start date')
+                    ->maxDate(fn (callable $get) => $get('endDate') ?: now()),
+                DatePicker::make('endDate')
+                    ->label('End date')
+                    ->minDate(fn (callable $get) => $get('startDate'))
+                    ->maxDate(now()),
             ])
             ->statePath('filters')
             ->live();
@@ -112,20 +125,21 @@ class Dashboard extends Page implements HasForms, HasTable
     {
         $query = Response::query();
 
-        $organizationId = (Auth::user()->role === UserRole::ADMIN)
-            ? Auth::user()->organization_id
-            : $this->selectedOrganizationId;
-
         $filters = $this->filters ?? [];
 
+        $organizationId = (Auth::user()->role === UserRole::ADMIN)
+            ? Auth::user()->organization_id
+            : $filters['organization_id'] ?? null;
+
         $query->when(
-            $organizationId || filled($filters['startDate'] ?? null) || filled($filters['endDate'] ?? null) || filled($filters['category_id'] ?? null),
+            $organizationId || filled($filters['startDate'] ?? null) || filled($filters['endDate'] ?? null) || filled($filters['category_id'] ?? null) || filled($filters['service_type'] ?? null) || filled($filters['standard_type'] ?? null),
             function (Builder $query) use ($organizationId, $filters) {
                 $query->whereHas('feedback', function (Builder $q) use ($organizationId, $filters) {
                     $q->when($organizationId, fn (Builder $q) => $q->where('organization_id', $organizationId))
                         ->when($filters['startDate'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '>=', $date))
                         ->when($filters['endDate'] ?? null, fn (Builder $q, $date) => $q->whereDate('created_at', '<=', $date))
-                        ->when($filters['category_id'] ?? null, fn (Builder $q, $categoryId) => $q->where('category_id', $categoryId));
+                        ->when($filters['category_id'] ?? null, fn (Builder $q, $categoryId) => $q->where('category_id', $categoryId))
+                        ->when($filters['service_type'] ?? null, fn (Builder $q, $serviceType)=> $q->whereHas('category', fn (Builder $q2) => $q2->where('service_type', $serviceType)));
                 });
             }
         );
@@ -160,22 +174,6 @@ class Dashboard extends Page implements HasForms, HasTable
             ->query($this->tableQuery())
             ->striped()
             ->paginated(false)
-            ->filters([
-                SelectFilter::make('service_type')
-                    ->label('Service Type')
-                    ->options(Feedback::serviceTypesLabel())
-                    ->query(function ($query, $data) {
-                        if (is_null($data['value'])) {
-                            return;
-                        }
-
-                        $query->whereHas('feedback', function ($q) use ($data) {
-                            $q->whereHas('category', function ($q2) use ($data) {
-                                $q2->where('service_type', $data);
-                            });
-                        });
-                    }),
-            ])
             ->columns(
                 array_merge([
                     TextColumn::make('question')
@@ -233,11 +231,11 @@ class Dashboard extends Page implements HasForms, HasTable
     public function getHeaderActions(): array
     {
         return [
-            SelectAction::make(),
-            FilterAction::make(),
+            // SelectAction::make(),
             Action::make('report')
                 ->label('Generate Report')
                 ->icon('gmdi-file-download'),
+            FilterAction::make(),
         ];
     }
 
@@ -252,10 +250,11 @@ class Dashboard extends Page implements HasForms, HasTable
     {
         return [
             OverviewStatsWidget::make([
-                'selectedOrganizationId' => $this->selectedOrganizationId,
+                'selectedOrganizationId' => $this->filters['organization_id'] ?? null,
+                'selectedCategoryId' => $this->filters['category_id'] ?? null,
             ]),
             SQD0Widget::make([
-                'selectedOrganizationId' => $this->selectedOrganizationId,
+                'selectedOrganizationId' => $this->filters['organization_id'] ?? null,
             ]),
         ];
     }
@@ -264,16 +263,16 @@ class Dashboard extends Page implements HasForms, HasTable
     {
         return [
             GenderChart::make([
-                'selectedOrganizationId' => $this->selectedOrganizationId,
+                'selectedOrganizationId' => $this->filters['organization_id'] ?? null,
             ]),
             CustomerTypeWidget::make([
-                'selectedOrganizationId' => $this->selectedOrganizationId,
+                'selectedOrganizationId' => $this->filters['organization_id'] ?? null,
             ]),
             AgeChartWidget::make([
-                'selectedOrganizationId' => $this->selectedOrganizationId,
+                'selectedOrganizationId' => $this->filters['organization_id'] ?? null,
             ]),
             RegionChartWidget::make([
-                'selectedOrganizationId' => $this->selectedOrganizationId,
+                'selectedOrganizationId' => $this->filters['organization_id'] ?? null,
             ]),
         ];
     }
@@ -282,7 +281,7 @@ class Dashboard extends Page implements HasForms, HasTable
     {
         $organizationId = Auth::user()->role === UserRole::ADMIN
             ? Auth::user()->organization_id
-            : $this->selectedOrganizationId;
+            : $this->filters['organization_id'] ?? null;
 
         return Category::query()
             ->when($organizationId, fn (Builder $query) => $query->where('organization_id', $organizationId))

@@ -12,7 +12,7 @@
     shift
     :width="MaxWidth::ExtraSmall"
     wire:key="{{ $livewire->getId() }}.dashboard.filters"
-    class="fi-ac-filter-action"
+    class="fi-ac-filter-action mr-2"
 >
     <x-slot name="trigger">
         <x-filament::icon-button

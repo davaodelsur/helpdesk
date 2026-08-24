@@ -16,6 +16,9 @@ class AgeChartWidget extends ChartWidget
     #[Reactive]
     public ?string $selectedOrganizationId = null;
 
+    #[Reactive]
+    public ?string $selectedCategoryId = null;
+
     protected static ?string $heading = 'Age Distribution';
 
     protected static string $color = 'info';
@@ -55,12 +58,5 @@ class AgeChartWidget extends ChartWidget
             ],
             'labels'=> ['0-19', '20-34', '35-49', '50-64', '65+', 'Did not specify'],
         ];
-    }
-
-    protected function getFilters(): ?array
-    {
-        return [
-            'overall' => 'Overall',
-            ] + EnumsFeedback::serviceTypesLabel();
     }
 }
